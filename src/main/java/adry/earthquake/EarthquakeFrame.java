@@ -8,6 +8,7 @@ import adry.earthquake.json.FeatureCollection;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 public class EarthquakeFrame extends JFrame {
 
@@ -20,31 +21,46 @@ public class EarthquakeFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         setLayout(new BorderLayout());
+        JRadioButton hour;
+        JRadioButton month;
 
+        hour = new JRadioButton("One Hour");
+        hour.addActionListener(e -> {
+            adry.earthquake.EarthquakeService service = new EarthquakeServiceFactory().getService();
+            Disposable disposable = service.oneHour()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(SwingSchedulers.edt())
+                    .subscribe(
+                            response -> handleResponse(response),
+                            Throwable::printStackTrace);
+        });
+
+        month = new JRadioButton("30 Days");
+        month.addActionListener(e -> {
+            adry.earthquake.EarthquakeService service = new EarthquakeServiceFactory().getService();
+            Disposable disposable = service.thirtyDays()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(SwingSchedulers.edt())
+                    .subscribe(
+                            response -> handleResponse2(response),
+                            Throwable::printStackTrace);
+        });
+
+
+        ButtonGroup radioButtons = new ButtonGroup();
+        radioButtons.add(hour);
+        radioButtons.add(month);
+
+        JPanel radioMenu = new JPanel(new GridLayout(1, 2));
+        Color periwinkle = new Color(190, 210, 255);
+        radioMenu.setBackground(periwinkle);
+        radioMenu.add(hour);
+        radioMenu.add(month);
+
+        add(radioMenu, BorderLayout.NORTH);
         add(jlist, BorderLayout.CENTER);
 
-        adry.earthquake.EarthquakeService service = new EarthquakeServiceFactory().getService();
 
-        Disposable disposable = service.oneHour()
-                // tells Rx to request the data on a background Thread
-                .subscribeOn(Schedulers.io())
-                // tells Rx to handle the response on Swing's main Thread
-                .observeOn(SwingSchedulers.edt())
-                //.observeOn(AndroidSchedulers.mainThread()) // Instead use this on Android only
-                .subscribe(
-                        (response) -> handleResponse(response),
-                        Throwable::printStackTrace);
-
-        adry.earthquake.EarthquakeService service1 = new EarthquakeServiceFactory().getService();
-        Disposable disposable2 = service.thirtyDays()
-                // tells Rx to request the data on a background Thread
-                .subscribeOn(Schedulers.io())
-                // tells Rx to handle the response on Swing's main Thread
-                .observeOn(SwingSchedulers.edt())
-                //.observeOn(AndroidSchedulers.mainThread()) // Instead use this on Android only
-                .subscribe(
-                        (response) -> handleResponse2(response),
-                        Throwable::printStackTrace);
     }
 
     private void handleResponse(FeatureCollection response) {
