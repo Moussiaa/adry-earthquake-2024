@@ -2,7 +2,7 @@
 
 
 
-![screenshot when it works] (![1hour.png](..%2F..%2FDesktop%2F1hour.png))
+![earthquake screenshot](/Users/Moussia/Desktop/earthquake_screenshot.png) 
 
 ### Links:
 
