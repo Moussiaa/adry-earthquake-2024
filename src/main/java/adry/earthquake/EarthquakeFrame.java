@@ -10,8 +10,6 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.URI;
 
 public class EarthquakeFrame extends JFrame {
@@ -32,36 +30,30 @@ public class EarthquakeFrame extends JFrame {
         EarthquakeService service = new EarthquakeServiceFactory().getService();
 
         hour = new JRadioButton("One Hour");
-        hour.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Disposable disposable = service.oneHour()
-                        // tells Rx to request the data on a background Thread
-                        .subscribeOn(Schedulers.io())
-                        // tells Rx to handle the response on Swing's main Thread
-                        .observeOn(SwingSchedulers.edt())
-                        //.observeOn(AndroidSchedulers.mainThread()) // Instead use this on Android only
-                        .subscribe(
-                                (response) -> handleResponse(response),
-                                Throwable::printStackTrace);
-            }
+        hour.addActionListener(e -> {
+            Disposable disposable = service.oneHour()
+                    // tells Rx to request the data on a background Thread
+                    .subscribeOn(Schedulers.io())
+                    // tells Rx to handle the response on Swing's main Thread
+                    .observeOn(SwingSchedulers.edt())
+                    //.observeOn(AndroidSchedulers.mainThread()) // Instead use this on Android only
+                    .subscribe(
+                            this::handleResponse,
+                            Throwable::printStackTrace);
         });
 
 
         month = new JRadioButton("30 Days");
-        month.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Disposable disposable = service.thirtyDays()
-                        // tells Rx to request the data on a background Thread
-                        .subscribeOn(Schedulers.io())
-                        // tells Rx to handle the response on Swing's main Thread
-                        .observeOn(SwingSchedulers.edt())
-                        //.observeOn(AndroidSchedulers.mainThread()) // Instead use this on Android only
-                        .subscribe(
-                                (response) -> handleResponse(response),
-                                Throwable::printStackTrace);
-            }
+        month.addActionListener(e -> {
+            Disposable disposable = service.thirtyDays()
+                    // tells Rx to request the data on a background Thread
+                    .subscribeOn(Schedulers.io())
+                    // tells Rx to handle the response on Swing's main Thread
+                    .observeOn(SwingSchedulers.edt())
+                    //.observeOn(AndroidSchedulers.mainThread()) // Instead use this on Android only
+                    .subscribe(
+                            this::handleResponse,
+                            Throwable::printStackTrace);
         });
 
 
@@ -80,19 +72,16 @@ public class EarthquakeFrame extends JFrame {
 
             add(radioMenu, BorderLayout.NORTH);
             add(jlist, BorderLayout.CENTER);
-            jlist.addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent listSelectionEvent) {
-                    int selectedIndex = jlist.getSelectedIndex();
-                    Feature ft = ftCollection.features[selectedIndex];
-                    double latitude = ft.geometry.getLatitude();
-                    double longitude = ft.geometry.getLongitude();
-                    try {
-                        Desktop.getDesktop().browse(new URI("https://maps.google.com/?q=" + latitude
-                                + "," + longitude));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            jlist.addListSelectionListener(listSelectionEvent -> {
+                int selectedIndex = jlist.getSelectedIndex();
+                Feature ft = ftCollection.features[selectedIndex];
+                double latitude = ft.geometry.getLatitude();
+                double longitude = ft.geometry.getLongitude();
+                try {
+                    Desktop.getDesktop().browse(new URI("https://maps.google.com/?q=" + latitude
+                            + "," + longitude));
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }
